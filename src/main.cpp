@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream> // for std::ifstream
-#include <string>  // for std::getline, std::string
 #include <cstddef> // for std::size_t
 
 int main(int argc, const char *argv[])
@@ -20,19 +19,37 @@ int main(int argc, const char *argv[])
         return 1;
     }
 
-    constexpr std::size_t charPerLine{16UL};
-
-    // Value-initializes all elements to zero ('/0')
-    char buffer[charPerLine]{};
-
-    while (in.getline(buffer, charPerLine))
+    char byte{};
+    // read the given file byte-by-byte
+    // and print them in a group of 16 bytes
+    // on each line
+    while (in.get(byte))
     {
-        std::cout << in.gcount() << ' ';
-        std::cout << buffer << '\n';
-        // std::cout << "PEEK: " << static_cast<int>(buffer[15UL]);
+        constexpr std::size_t charPerLine{16UL};
+        static std::size_t charPrintedCount{0};
+
+        if (charPrintedCount < charPerLine)
+        {
+            if (byte == '\n')
+                std::cout << '.';
+            else
+                std::cout << byte;
+        }
+        else
+        {
+            if (byte == '\n')
+                std::cout << '\n'
+                          << '.';
+            else
+                std::cout << '\n'
+                          << byte;
+            charPrintedCount = 0;
+        }
+
+        ++charPrintedCount;
     }
 
-    std::cout << in.fail() << '\n';
+    std::cout << '\n';
 
     // ifstream object (in) will automatically close the file
     // via its destructor.
