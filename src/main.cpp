@@ -19,25 +19,38 @@ int main(int argc, const char *argv[])
         return 1;
     }
 
-    char byte{};
     // read the given file byte-by-byte
     // and print them in a group of 16 bytes
     // on each line
-    while (in.get(byte))
+    // keep the loop running until !(std::ifstream::fail())
+
+    while (in)
     {
+        // using this integral representation of
+        // a byte I can print it in different forms
+        // like hex, oct, dec, and ascii
+        int ch{in.get()};
+
+        // if we have reached to the EOF
+        // terminate the loop
+        if (!in)
+            break;
+
+        unsigned char byte{static_cast<unsigned char>(ch)};
+
         constexpr std::size_t charPerLine{16UL};
         static std::size_t charPrintedCount{0};
 
         if (charPrintedCount < charPerLine)
         {
-            if (byte == '\n')
+            if (byte <= 31 || byte >= 127)
                 std::cout << '.';
             else
                 std::cout << byte;
         }
         else
         {
-            if (byte == '\n')
+            if (byte <= 31 || byte >= 127)
                 std::cout << '\n'
                           << '.';
             else
