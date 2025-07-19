@@ -1,7 +1,10 @@
 #include <iostream>
 #include <fstream> // for std::ifstream
 #include <cstddef> // for std::size_t
-#include <string>
+
+void printHex(const char *buffer, std::streamsize count);
+void printASCII(const char *buffer, std::streamsize count);
+void printOct(const char *buffer, std::streamsize count);
 
 int main(int argc, const char *argv[])
 {
@@ -32,71 +35,67 @@ int main(int argc, const char *argv[])
         // read bufLen byte(s) at a time
         in.read(buffer, bufLen);
 
-        // ONLY print the first in.gcount()
-        // chars
-        for (auto i{0}; i < in.gcount(); ++i)
-        {
-            char byte{buffer[i]};
+		// print the content of the buffer
+		// in following formats:
+		// hex
+		// ascii
+		// oct
 
-            // substitute un-printable chars
-            // with '.' char
-            if (byte <= 31 || byte >= 127)
-                std::cout << '.';
-            else
-                std::cout << byte;
-        }
+		printHex(buffer, in.gcount());
+		std::cout << '\t';
+		printASCII(buffer, in.gcount());
 
-        std::cout << '\n';
-    }
+		std::cout << '\n';
+	}
 
-#if 0
-    // read the given file byte-by-byte
-    // and print them in a group of 16 bytes
-    // on each line
-    // keep the loop running until !(std::ifstream::fail())
+	// ifstream object (in) will automatically close the file
+	// via its destructor.
 
-    while (in)
-    {
-        // using this integral representation of
-        // a byte I can print it in different forms
-        // like hex, oct, dec, and ascii
-        int ch{in.get()};
+	return 0;
+}
 
-        // if we have reached to the EOF
-        // terminate the loop
-        if (!in)
-            break;
+void printASCII(const char *buffer, std::streamsize count)
+{
+	for (auto i{0}; i < count; ++i)
+	{
+		char byte{buffer[i]};
 
-        unsigned char byte{static_cast<unsigned char>(ch)};
+		// substitute un-printable chars
+		// with '.' char
+		if (byte <= 31 || byte >= 127)
+			std::cout << '.';
+		else
+			std::cout << byte;
+	}
+}
 
-        constexpr std::size_t charPerLine{16UL};
-        static std::size_t charPrintedCount{0};
+void printHex(const char *buffer, std::streamsize count)
+{
+	std::cout << std::hex;
 
-        if (charPrintedCount < charPerLine)
-        {
-            if (byte <= 31 || byte >= 127)
-                std::cout << '.';
-            else
-                std::cout << byte;
-        }
-        else
-        {
-            if (byte <= 31 || byte >= 127)
-                std::cout << '\n'
-                          << '.';
-            else
-                std::cout << '\n'
-                          << byte;
-            charPrintedCount = 0;
-        }
+	int bytePrintedCount{0};
 
-        ++charPrintedCount;
-    }
+	for (auto i{0}; i < count; ++i)
+	{
+		int byte{buffer[i]};
 
-#endif
+		constexpr int bytesGroup{2};
 
-    // ifstream object (in) will automatically close the file
-    // via its destructor.
+		if (bytePrintedCount == bytesGroup)
+		{
+			std::cout << ' ';
+			bytePrintedCount = 0;
+		}
 
-    return 0;
+		// substitute un-printable chars
+		// with '.' char
+		if (byte <= 31 || byte >= 127)
+			std::cout << "00";
+		else
+			std::cout << byte;
+
+		++bytePrintedCount;
+	}
+
+	std::cout << std::dec;
 }
