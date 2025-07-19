@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream> // for std::ifstream
 #include <cstddef> // for std::size_t
+#include <iomanip> // for std::setw, std::setfill
 
 void printHex(const char *buffer, std::streamsize count);
 void printASCII(const char *buffer, std::streamsize count);
@@ -35,15 +36,34 @@ int main(int argc, const char *argv[])
         // read bufLen byte(s) at a time
         in.read(buffer, bufLen);
 
+		// The number of characters extracted by the previous
+		// extraction
+		std::streamsize charCount{in.gcount()};
+
 		// print the content of the buffer
 		// in following formats:
 		// hex
 		// ascii
 		// oct
 
-		printHex(buffer, in.gcount());
-		std::cout << '\t';
-		printASCII(buffer, in.gcount());
+		printHex(buffer, charCount);
+
+		// if we have reached the EOF
+		// then there is a possibility
+		// that might be less bytes printed
+		// than expected, and it might mess up the formatting
+		// so we need to calculate the remaining tabs
+		if (!in)
+		{
+			std::streamsize remainingTabs{(bufLen - charCount) / 2};
+			std::cout << std::setw(
+							 static_cast<int>(remainingTabs))
+					  << std::setfill('\t');
+		}
+		else
+			std::cout << '\t';
+
+		printASCII(buffer, charCount);
 
 		std::cout << '\n';
 	}
