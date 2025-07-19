@@ -40,11 +40,22 @@ int main(int argc, const char *argv[])
 		// extraction
 		std::streamsize charCount{in.gcount()};
 
+		static std::streamsize offset{0};
+
 		// print the content of the buffer
 		// in following formats:
 		// hex
 		// ascii
 		// oct
+
+		// print the current byte offset in HEX
+		std::cout << std::setw(bufLen / 2) << std::setfill('0');
+		std::cout << std::hex;
+		std::cout << offset;
+		std::cout << ": ";
+		std::cout << std::dec;
+
+		offset += bufLen;
 
 		printHex(buffer, charCount);
 
@@ -55,13 +66,13 @@ int main(int argc, const char *argv[])
 		// so we need to calculate the remaining tabs
 		if (!in)
 		{
-			std::streamsize remainingTabs{(bufLen - charCount) / 2};
+			std::streamsize remainingTabs{(bufLen - charCount)};
 			std::cout << std::setw(
-							 static_cast<int>(remainingTabs))
-					  << std::setfill('\t');
+							 static_cast<int>(bufLen + remainingTabs))
+					  << std::setfill(' ');
 		}
 		else
-			std::cout << '\t';
+			std::cout << "  ";
 
 		printASCII(buffer, charCount);
 
